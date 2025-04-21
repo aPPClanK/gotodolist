@@ -26,6 +26,7 @@ func CheckPasswordHash(password, hash string) bool {
 
 func Register(c *fiber.Ctx) error {
 	var input AuthInput
+
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
 	}
@@ -36,11 +37,16 @@ func Register(c *fiber.Ctx) error {
 	}
 
 	user := model.User{Name: input.Name, Password: hashedPassword}
-	if err := database.DB.Create(&user).Error; err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "User already exists"})
+	query := database.DB.FirstOrCreate(&user)
+	if err := query.Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Internal server error"})
 	}
 
-	return c.JSON(fiber.Map{"status": "Registration successful"})
+	if query.RowsAffected == 1 {
+		return c.Status(fiber.StatusCreated).JSON(fiber.Map{"status": "Registration successful"})
+	}
+
+	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Username already exists"})
 }
 
 func Login(c *fiber.Ctx) error {
@@ -51,11 +57,11 @@ func Login(c *fiber.Ctx) error {
 
 	var user model.User
 	if err := database.DB.Where("name = ?", input.Name).First(&user).Error; err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "User not found"})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid username and/or password"})
 	}
 
 	if !CheckPasswordHash(input.Password, user.Password) {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Wrong password"})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid username and/or password"})
 	}
 
 	token, err := middleware.GenerateJWT(user.ID)
@@ -63,5 +69,5 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Token generation failed"})
 	}
 
-	return c.JSON(token)
+	return c.Status(fiber.StatusCreated).JSON(token)
 }

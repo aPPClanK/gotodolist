@@ -17,7 +17,7 @@ func GetTasks(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Get tasks error"})
 	}
 
-	return c.JSON(tasks)
+	return c.Status(fiber.StatusOK).JSON(tasks)
 }
 func GetTaskById(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(uint)
@@ -30,7 +30,7 @@ func GetTaskById(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task not found or not yours"})
 	}
 
-	return c.JSON(task)
+	return c.Status(fiber.StatusOK).JSON(task)
 }
 func CreateTask(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(uint)
@@ -50,7 +50,7 @@ func CreateTask(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Create failed"})
 	}
 
-	return c.JSON(task)
+	return c.Status(fiber.StatusCreated).JSON(task)
 }
 
 func UpdateTaskById(c *fiber.Ctx) error {
@@ -71,7 +71,7 @@ func UpdateTaskById(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Update failed"})
 	}
 
-	return c.JSON(task)
+	return c.Status(fiber.StatusOK).JSON(task)
 }
 
 func DeleteTaskById(c *fiber.Ctx) error {
@@ -89,5 +89,5 @@ func DeleteTaskById(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Delete failed"})
 	}
 
-	return c.JSON(fiber.Map{"status": "success"})
+	return c.SendStatus(fiber.StatusNoContent)
 }

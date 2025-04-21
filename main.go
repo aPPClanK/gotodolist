@@ -19,5 +19,5 @@ func main() {
 	app := fiber.New()
 	route.SetupRoutes(app)
 
-	log.Fatal(app.Listen("localhost:3000"))
+	log.Fatal(app.ListenTLS("localhost:3000", "cert.pem", "key.pem"))
 }
