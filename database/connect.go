@@ -1,10 +1,9 @@
-package db
+package database
 
 import (
-	"log"
 	"os"
 
-	"github.com/aPPClanK/gotodolist/models"
+	"github.com/aPPClanK/gotodolist/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -17,8 +16,8 @@ func Connect() error {
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	DB.AutoMigrate(&models.User{}, &models.Task{})
+	DB.AutoMigrate(&model.User{}, &model.Task{})
 	return nil
 }
