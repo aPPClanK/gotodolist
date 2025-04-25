@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/aPPClanK/gotodolist/database"
 	"github.com/aPPClanK/gotodolist/route"
@@ -19,5 +20,9 @@ func main() {
 	app := fiber.New()
 	route.SetupRoutes(app)
 
-	log.Fatal(app.ListenTLS("localhost:3000", "cert.pem", "key.pem"))
+	host := os.Getenv("APP_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	log.Fatal(app.Listen(host + ":3000"))
 }
